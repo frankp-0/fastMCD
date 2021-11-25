@@ -10,15 +10,16 @@ fastMCD <- function(X, h = 0){
         if (n <= 600) {
             res <- smallMCD(X, h)
         } else {
-            res <- bigMCD(X, h)
+            res <- bigMCD(X, h, p, n)
             }
-        d <- d2(X, res$T, res$S)
-        S_mcd <- median(d) * res$S / qchisq(p = 0.5, df = p)
-        w <- d2(X, res$T, S_mcd) <= qchisq(p = 0.975, df = p)
-        mu <- colSums(X * w) / sum(w)
-        sigma2 <- (t(X) %*% (X * w)) / (sum(w) - 1)
+        d2 <- mahalanobis(X, center = res$T, cov = res$S)
+        S_mcd <- median(d2) * res$S / qchisq(p = 0.5, df = p)
+        w <- mahalanobis(X, center = res$T, cov = S_mcd)
+        w <- w <= qchisq(p = 0.975, df = p)
+        T <- colSums(X * w) / sum(w)
+        S <- (t(X) %*% (X * w)) / (sum(w) - 1)
     }
-    return(list(mu = mu, sigma2 = sigma2))
+    return(list(center = T, cov = S))
 }
 
 smallMCD <- function(X, h){
@@ -38,7 +39,7 @@ smallMCD <- function(X, h){
     return(list(T = colMeans(X[res$H,]), S = cov(X[res$H,])))
 }
 
-bigMCD <- function(X, h, p){
+bigMCD <- function(X, h, p, n){
     k <- min(5, ceiling(n / 300))
     n_merge  <- min(1500, n)
     i_start <- rep(n_merge %% k, k)
@@ -130,8 +131,8 @@ step_it <- function(X, T, S, h, it = 0){
 }
 
 cstep <- function(X, T, S, h){
-    d <- d2(X, T, S)
-    H2 <- head(order(d), h)
+    d2 <- mahalanobis(X, center = T, cov = S)
+    H2 <- head(order(d2), h)
     S2 <- cov(X[H2, ])
     T2 <- colMeans(X[H2, ])
     return(list(H = H2, S = S2, det_S = det(S2), T = T2))
@@ -140,21 +141,14 @@ cstep <- function(X, T, S, h){
 draw_h <- function(X, h){
     p <- ncol(X); n <- nrow(X)
     j <- sample(1:n, p + 1)
-    mu <- colMeans(X[j, ])
-    s <- cov(X[j,])
-    while(det(s) == 0 & length(j) < n - 1){
+    T <- colMeans(X[j, ])
+    S <- cov(X[j,])
+    while(det(S) == 0 & length(j) < n - 1){
         j <- c(j, sample((1:n)[-j], 1))
-        mu <- colMeans(X[j, ])
-        s <- cov(X[j, ])      
+        T <- colMeans(X[j, ])
+        S <- cov(X[j, ])      
     }
-    d <- d1(X, mu, s)
-    H1 <- head(order(d), h)
+    d2 <- mahalanobis(X, center = T, cov = S)
+    H1 <- head(order(d2), h)
     return(H1)
-}
-
-d2 <- function(X, T, S){
-    S_inv <- solve(S)
-    d <- apply(X, 1, function(x) {
-        (x - T) %*% S_inv %*% (x - T)
-    })    
 }
