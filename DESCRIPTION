@@ -1,8 +1,8 @@
 Package: fastMCD
 Title: Robust multivariate estimation of location and scatter
 Version: 0.0.0.9000
-Authors@R: 
-    person("Frank", "Ockerman", , "foc@umich.edu", role = c("aut", "cre"))	   
+Author: Frank Ockerman <frank.ockerman@gmail.com>
+Maintainer: Frank Ockerman <frank.ockerman@gmail.com>
 Description: This package is my attempt to implement the FAST-MCD algorithm described by Rousseeuw and van Driessen (1999).
 Imports:
     stats

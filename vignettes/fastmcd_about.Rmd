@@ -1,9 +1,8 @@
 ---
 title: "Introducing fastMCD"
 output: rmarkdown::html_vignette
-bibliography: references.bib
 vignette: >
-  %\VignetteIndexEntry{fastmcd_about}
+  %\VignetteIndexEntry{Introducing fastMCD}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
