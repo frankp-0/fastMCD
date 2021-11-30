@@ -1,3 +1,15 @@
+#' Estimate location and scatter using FAST-MCD algorithm
+#' @param X A 2D matrix to estimate location and scatter from
+#' @param h An integer optionally specifying number of observations to use
+#' @return A list of estimated location (center) and scatter (cov)
+#' @examples
+#' set.seed(51234)
+#' S <- matrix(runif(5^2), 5)
+#' S <- t(S) %*% S
+#' X <- MASS::mvrnorm(700, mu = rep(0, 5), Sigma = S) # generate random matrix
+#' outliers <- MASS::mvrnorm(140, mu = rep(5, 5), Sigma = sigma)
+#' X[seq(1, 700, 5), ] <- outliers # set 20% of observations to be outliers 
+#' res <- fastMCD(X) # estimate location and scatter
 fastMCD <- function(X, h = 0){
     n <- nrow(X); p <- ncol(X)
     if (!h) {
@@ -22,6 +34,18 @@ fastMCD <- function(X, h = 0){
     return(list(center = T, cov = S))
 }
 
+#' Obtain unweighted estimates for data with <= 600 observations
+#' @param X A 2D matrix to estimate location and scatter from
+#' @param h An integer specifying number of observations to use
+#' @return A list of estimated location (center) and scatter (cov)
+#' @examples
+#' set.seed(90918)
+#' S <- matrix(runif(5^2), 5)
+#' S <- t(S) %*% S
+#' X <- MASS::mvrnorm(400, mu = rep(0, 5), Sigma = S) # generate random matrix
+#' outliers <- MASS::mvrnorm(80, mu = rep(5, 5, Sigma = sigma)
+#' X[seq(1, 400, 5), ] <- outliers # set 20% of observations to be outliers 
+#' res <- smallMCD(X, h = 300) # estimate unweighted location and scatter
 smallMCD <- function(X, h){
     H_all <- sapply(1:500, function(i) {
         draw_h(X, h)
@@ -39,6 +63,18 @@ smallMCD <- function(X, h){
     return(list(T = colMeans(X[res$H,]), S = cov(X[res$H,])))
 }
 
+#' Obtain unweighted estimates for data with > 600 observations
+#' @param X A 2D matrix to estimate location and scatter from
+#' @param h An integer specifying number of observations to use
+#' @return A list of estimated location (center) and scatter (cov)
+#' @examples
+#' set.seed(98134)
+#' S <- matrix(runif(5^2), 5)
+#' S <- t(S) %*% S
+#' X <- MASS::mvrnorm(10000, mu = rep(0, 5), Sigma = S) # generate random matrix
+#' outliers <- MASS::mvrnorm(2000, mu = rep(5, 5, Sigma = sigma)
+#' X[seq(1, 10000, 5), ] <- outliers # set 20% of observations to be outliers 
+#' res <- smallMCD(X, h = 300) # estimate unweighted location and scatter
 bigMCD <- function(X, h, p, n){
     k <- min(5, ceiling(n / 300))
     n_merge  <- min(1500, n)
@@ -88,6 +124,12 @@ bigMCD <- function(X, h, p, n){
     return(list(S = res[[imin]]$S, T = res[[imin]]$T))
 }
 
+#' Choose the 10 best estimates after iterating twice through initial sets
+#' @param X A 2D matrix
+#' @param H_all A 2D matrix where each row specifies a subset of observations
+#' @param An integer specifying number of observations to use
+#' @return A list of best sets (H), scatter (S) and location (T)
+
 pick10 <- function(X, H_all, h){
     res <- apply(H_all, 2, function(H) {
         S <- cov(X[H, ])
@@ -108,6 +150,15 @@ pick10 <- function(X, H_all, h){
         })
     return(list(H = H[, head(order(det_S), 10)], S = S[head(order(det_S), 10)], T = T[, head(order(det_S), 10)]))
 }
+
+#' Iterate through C-step
+#' @param X A 2D matrix
+#' @param T A vector of the initial location estimate
+#' @param S A vector of the initial scatter estimate
+#' @param h An integer specifying the number of observations to use
+#' @param it An optional integer specifying the number of C-steps to perform.
+#' With it = 0, C-step will be performed until convergence
+#' @return A list of set (H), scatter (S) and location (T)
 
 step_it <- function(X, T, S, h, it = 0){
    if(!it){
@@ -130,6 +181,12 @@ step_it <- function(X, T, S, h, it = 0){
     return(res)
 }
 
+#' Perform single iteration of C-step
+#' @param X A 2D matrix
+#' @param T A vector of the initial location estimate
+#' @param S A vector of the initial scatter estimate
+#' @param h An integer specifying the number of observations to use
+#' @return A list of set (H), scatter (S) and location (T)
 cstep <- function(X, T, S, h){
     d2 <- mahalanobis(X, center = T, cov = S)
     H2 <- head(order(d2), h)
@@ -138,6 +195,10 @@ cstep <- function(X, T, S, h){
     return(list(H = H2, S = S2, det_S = det(S2), T = T2))
 }
 
+#' Randomly draw a subset of observations
+#' @param X A 2D matrix
+#' @param h An integer specifying the number of observations to use
+#' @return A vector representing an h-length subset of X
 draw_h <- function(X, h){
     p <- ncol(X); n <- nrow(X)
     j <- sample(1:n, p + 1)
