@@ -11,7 +11,7 @@ pick10(X, H_all, h)
 
 \item{H_all}{A 2D matrix where each row specifies a subset of observations}
 
-\item{An}{integer specifying number of observations to use}
+\item{h}{An integer specifying number of observations to use}
 }
 \value{
 A list of best sets (H), scatter (S) and location (T)

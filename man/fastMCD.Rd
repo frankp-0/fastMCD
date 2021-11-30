@@ -22,7 +22,7 @@ set.seed(51234)
 S <- matrix(runif(5^2), 5)
 S <- t(S) \%*\% S
 X <- MASS::mvrnorm(700, mu = rep(0, 5), Sigma = S) # generate random matrix
-outliers <- MASS::mvrnorm(140, mu = rep(5, 5), Sigma = sigma)
+outliers <- MASS::mvrnorm(140, mu = rep(5, 5), Sigma = S)
 X[seq(1, 700, 5), ] <- outliers # set 20\% of observations to be outliers 
 res <- fastMCD(X) # estimate location and scatter
 }

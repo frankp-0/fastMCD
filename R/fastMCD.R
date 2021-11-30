@@ -2,12 +2,15 @@
 #' @param X A 2D matrix to estimate location and scatter from
 #' @param h An integer optionally specifying number of observations to use
 #' @return A list of estimated location (center) and scatter (cov)
+#' @export
+#' @importFrom stats mahalanobis median qchisq cov
+#' @import utils
 #' @examples
 #' set.seed(51234)
 #' S <- matrix(runif(5^2), 5)
 #' S <- t(S) %*% S
 #' X <- MASS::mvrnorm(700, mu = rep(0, 5), Sigma = S) # generate random matrix
-#' outliers <- MASS::mvrnorm(140, mu = rep(5, 5), Sigma = sigma)
+#' outliers <- MASS::mvrnorm(140, mu = rep(5, 5), Sigma = S)
 #' X[seq(1, 700, 5), ] <- outliers # set 20% of observations to be outliers 
 #' res <- fastMCD(X) # estimate location and scatter
 fastMCD <- function(X, h = 0){
@@ -38,12 +41,13 @@ fastMCD <- function(X, h = 0){
 #' @param X A 2D matrix to estimate location and scatter from
 #' @param h An integer specifying number of observations to use
 #' @return A list of estimated location (center) and scatter (cov)
+#' @export
 #' @examples
 #' set.seed(90918)
 #' S <- matrix(runif(5^2), 5)
 #' S <- t(S) %*% S
 #' X <- MASS::mvrnorm(400, mu = rep(0, 5), Sigma = S) # generate random matrix
-#' outliers <- MASS::mvrnorm(80, mu = rep(5, 5, Sigma = sigma)
+#' outliers <- MASS::mvrnorm(80, mu = rep(5, 5), Sigma = S)
 #' X[seq(1, 400, 5), ] <- outliers # set 20% of observations to be outliers 
 #' res <- smallMCD(X, h = 300) # estimate unweighted location and scatter
 smallMCD <- function(X, h){
@@ -66,13 +70,16 @@ smallMCD <- function(X, h){
 #' Obtain unweighted estimates for data with > 600 observations
 #' @param X A 2D matrix to estimate location and scatter from
 #' @param h An integer specifying number of observations to use
+#' @param p An integer specifying the number of columns in X
+#' @param n An integer specifying the number of total observations
 #' @return A list of estimated location (center) and scatter (cov)
+#' @export
 #' @examples
 #' set.seed(98134)
 #' S <- matrix(runif(5^2), 5)
 #' S <- t(S) %*% S
 #' X <- MASS::mvrnorm(10000, mu = rep(0, 5), Sigma = S) # generate random matrix
-#' outliers <- MASS::mvrnorm(2000, mu = rep(5, 5, Sigma = sigma)
+#' outliers <- MASS::mvrnorm(2000, mu = rep(5, 5), Sigma = S)
 #' X[seq(1, 10000, 5), ] <- outliers # set 20% of observations to be outliers 
 #' res <- smallMCD(X, h = 300) # estimate unweighted location and scatter
 bigMCD <- function(X, h, p, n){
@@ -127,9 +134,9 @@ bigMCD <- function(X, h, p, n){
 #' Choose the 10 best estimates after iterating twice through initial sets
 #' @param X A 2D matrix
 #' @param H_all A 2D matrix where each row specifies a subset of observations
-#' @param An integer specifying number of observations to use
+#' @param h An integer specifying number of observations to use
 #' @return A list of best sets (H), scatter (S) and location (T)
-
+#' @export
 pick10 <- function(X, H_all, h){
     res <- apply(H_all, 2, function(H) {
         S <- cov(X[H, ])
@@ -159,6 +166,7 @@ pick10 <- function(X, H_all, h){
 #' @param it An optional integer specifying the number of C-steps to perform.
 #' With it = 0, C-step will be performed until convergence
 #' @return A list of set (H), scatter (S) and location (T)
+#' @export
 
 step_it <- function(X, T, S, h, it = 0){
    if(!it){
@@ -199,6 +207,7 @@ cstep <- function(X, T, S, h){
 #' @param X A 2D matrix
 #' @param h An integer specifying the number of observations to use
 #' @return A vector representing an h-length subset of X
+#' @export
 draw_h <- function(X, h){
     p <- ncol(X); n <- nrow(X)
     j <- sample(1:n, p + 1)

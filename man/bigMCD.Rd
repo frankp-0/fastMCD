@@ -10,6 +10,10 @@ bigMCD(X, h, p, n)
 \item{X}{A 2D matrix to estimate location and scatter from}
 
 \item{h}{An integer specifying number of observations to use}
+
+\item{p}{An integer specifying the number of columns in X}
+
+\item{n}{An integer specifying the number of total observations}
 }
 \value{
 A list of estimated location (center) and scatter (cov)
@@ -22,7 +26,7 @@ set.seed(98134)
 S <- matrix(runif(5^2), 5)
 S <- t(S) \%*\% S
 X <- MASS::mvrnorm(10000, mu = rep(0, 5), Sigma = S) # generate random matrix
-outliers <- MASS::mvrnorm(2000, mu = rep(5, 5, Sigma = sigma)
+outliers <- MASS::mvrnorm(2000, mu = rep(5, 5), Sigma = S)
 X[seq(1, 10000, 5), ] <- outliers # set 20\% of observations to be outliers 
 res <- smallMCD(X, h = 300) # estimate unweighted location and scatter
 }
