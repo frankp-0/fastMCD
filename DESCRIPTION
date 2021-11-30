@@ -5,13 +5,16 @@ Author: Frank Ockerman <frank.ockerman@gmail.com>
 Maintainer: Frank Ockerman <frank.ockerman@gmail.com>
 Description: This package is my attempt to implement the FAST-MCD algorithm described by Rousseeuw and van Driessen (1999).
 Imports:
-    stats
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    stats,
+    base,
+    MASS
+License: Unlimited
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Suggests: 
     rmarkdown,
-    knitr
+    knitr,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
+Config/testthat/edition: 3
