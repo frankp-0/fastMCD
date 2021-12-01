@@ -1,6 +1,6 @@
-___
-output: github_content
-___
+---
+output: github_document
+---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
