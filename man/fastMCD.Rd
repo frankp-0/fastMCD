@@ -2,7 +2,8 @@
 % Please edit documentation in R/fastMCD.R
 \name{fastMCD}
 \alias{fastMCD}
-\title{Estimate location and scatter using FAST-MCD algorithm}
+\title{fastMCD
+Estimate location and scatter using FAST-MCD algorithm}
 \usage{
 fastMCD(X, h = 0)
 }
@@ -15,6 +16,7 @@ fastMCD(X, h = 0)
 A list of estimated location (center) and scatter (cov)
 }
 \description{
+fastMCD
 Estimate location and scatter using FAST-MCD algorithm
 }
 \examples{

@@ -17,12 +17,3 @@ A list of estimated location (center) and scatter (cov)
 \description{
 Obtain unweighted estimates for data with <= 600 observations
 }
-\examples{
-set.seed(90918)
-S <- matrix(runif(5^2), 5)
-S <- t(S) \%*\% S
-X <- MASS::mvrnorm(400, mu = rep(0, 5), Sigma = S) # generate random matrix
-outliers <- MASS::mvrnorm(80, mu = rep(5, 5), Sigma = S)
-X[seq(1, 400, 5), ] <- outliers # set 20\% of observations to be outliers 
-res <- smallMCD(X, h = 300) # estimate unweighted location and scatter
-}
