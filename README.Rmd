@@ -2,7 +2,12 @@ ___
 output: github_content
 ___
 
-
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  out.width = "100%"
+  )
+```
 
 # fastMCD
 
@@ -11,16 +16,12 @@ The minimum covariance determinant (MCD) method obtains robust estimates of loca
 
 
 ## Installation
-
-```r
+```{r, installation}
 devtools::install_github("frankp-0/fastMCD")
-## Skipping install of 'fastMCD' from a github remote, the SHA1 (ebb2af9b) has not changed since last install.
-##   Use `force = TRUE` to force installation
 ```
 
 ## Usage
-
-```r
+```{r, small example}
 library(fastMCD)
 data(smallX)
 ```
