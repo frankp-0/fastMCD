@@ -18,6 +18,7 @@ The minimum covariance determinant (MCD) method obtains robust estimates of loca
 ```r
 devtools::install_github("frankp-0/fastMCD", build_vignettes = T)
 ```
+Note that installation may take > 1 minute if vignettes are built.
 
 ## Usage
 The following examples demonstrate the usage of `fastMCD` for small (350 observations) and large (5000 observations) datasets.
