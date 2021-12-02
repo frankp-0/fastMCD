@@ -20,17 +20,17 @@ The minimum covariance determinant (MCD) method obtains robust estimates of loca
 
 ## Installation
 ```{r, installation, eval = FALSE}
-devtools::install_github("frankp-0/fastMCD")
+devtools::install_github("frankp-0/fastMCD", build_vignettes = T)
 ```
 
 ## Usage
 The following examples demonstrate the usage of `fastMCD` for small (350 observations) and large (5000 observations) datasets which contain outliers. In both cases, the true means are 0 and the true covariance matrices are 3x3 identity matrices.
 ```{r, small example}
 library(fastMCD)
-data(smallX)
+smallX <- MASS::mvrnorm(n = 350, mu = rep(0, 3), Sigma = diag(rep(1, 3)))
 fastMCD(smallX)
 ```
 ```{r, big example}
-data(bigX)
+bigX <- MASS::mvrnorm(n = 350, mu = rep(0, 3), Sigma = diag(rep(1, 3)))
 fastMCD(bigX)
 ```
