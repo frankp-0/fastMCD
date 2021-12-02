@@ -1,0 +1,183 @@
+---
+title: "Demonstration of fastMCD"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{demonstration of fastMCD}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(fastMCD)
+library(MASS)
+library(robustbase)
+library(tictoc)
+```
+
+## Overview
+To demonstrate the usage of `fastMCD`, we will first generate matrices from a multivariate gaussian distribution with known center ($\mu$) and scatter ($\Sigma$). In this case, we will choose $\mu = 0_3$ and $\Sigma = \mathbb{1}_3$.
+
+```{r, generate X}
+set.seed(54513)
+mu <- rep(0, 3)
+sigma <- diag(rep(1, 3))
+X <- mvrnorm(n = 20000, mu = mu, Sigma = sigma)
+```
+
+We will then replace some proportion of these observations with observations from a multivariate gaussian distribution with different parameters $\mu_1$ and $\Sigma_1$. 
+
+```{r, outlier}
+mu1 <- rep(5, 3)
+sigma1 <- matrix(c(1,0.2,0.4,0.2,3,0.5,0.4,0.5,1), nrow = 3)
+outlier_index <- seq(from = 1, to = 20000, length = 1000)
+X[outlier_index,] <- mvrnorm(n = 1000, mu = mu1, Sigma = sigma1)
+```
+
+We can observe how the naive sample mean and sample covariance fail when these outliers are introduced.
+
+```{r, naive}
+colMeans(X)
+cov(X)
+```
+
+To obtain a robust estimate of the mean and covariance, we use `fastMCD`.
+
+```{r, fastMCD}
+res <- fastMCD(X)
+res$center
+res$cov
+```
+
+Our new estimates from `fastMCD` are much closer to the true parameters than the naive estimates.
+
+## Accuracy
+
+To assess the accuracy of `fastMCD`, we can simulate data under a variety of parameters and compare the results of `fastMCD`to results obtained using `robustbase::covMcd`, which also provides an implementation of the FAST-MCD algorithm. Although estimates are not deterministic, we can expect `fastMCD` and `robust::covMcd` to give approximately equal results.
+
+```{r}
+X <- mvrnorm(2000, mu = rep(1, 3), Sigma = diag(rep(1, 3)))
+X[sample(1:2000, 100),] <- mvrnorm(100, mu = rep(10,3), Sigma = diag(rep(1,3)))
+alpha <- ((2000 + 3 + 1) / 2) / 2000
+res <- fastMCD(X)
+res_rob <- covMcd(X, raw.only = T, alpha = alpha)
+all.equal(res$center, unname(res_rob$center), tol = 0.1)
+all.equal(as.vector(res$cov), as.vector(res_rob$cov), tol = 0.1)
+```
+
+### Paired t-test
+Because FAST-MCD randomly samples subsets, its estimates will differ from run to run. One way to test whether the accuracy of `fastMCD` differs from that of `covMcd` is to conduct a simulation study and perform a statistical test. We simulate 100 matrices, add 10% outliers, and report the mean of the absolute error of the covariance matrix for each method. We can then use a paired t-test to determine whether there a significant difference in the mean error of covariance terms for `fastMCD` and `covMcd`.
+
+```{r}
+n_sim <- 50
+res_f <- rep(0, n_sim)
+res_r <- rep(0, n_sim)
+n <- 700
+alpha <- ((n + 3 + 1) / 2) / n
+for (i in 1:n_sim){
+    X <- mvrnorm(n, mu = rep(1, 3), Sigma = diag(rep(1, 3)))
+    X[sample(1:n, 100),] <- mvrnorm(100, mu = rep(3, 3), Sigma = diag(rep(1, 3)))
+    res <- fastMCD(X)
+    resrob <- covMcd(X, raw.only = T, alpha = alpha)
+    res_f[i] <- mean(abs(res$cov - diag(rep(1,3))))
+    res_r[i] <- mean(abs(resrob$cov - diag(rep(1,3))))
+}
+
+t.test(x = res_f, y = res_r, paired = T)
+```
+
+We may repeat this procedure under other parameter schemes. For example, we may use 2,000 subjects, a random mean vector from a uniform distribution from -10 to 10, and a randomly generated covariance matrix, with outliers coming from a gaussian distribution, with outliers coming from the same distribution with a shifted mean vector.
+
+```{r}
+n_sim <- 50
+res_f <- rep(0, n_sim)
+res_r <- rep(0, n_sim)
+n <- 2000
+alpha <- ((n + 3 + 1) / 2)  / n
+mu <- rnorm(3, -10, 10)
+Sigma <- matrix(runif(9, 0, 3), 3)
+Sigma <- t(Sigma) %*% Sigma
+for (i in 1:n_sim){
+    X <- mvrnorm(n, mu = mu, Sigma = Sigma)
+    X[sample(1:n, 100),] <- mvrnorm(100, mu = mu + rnorm(3), Sigma = Sigma)
+    res <- fastMCD(X)
+    resrob <- covMcd(X, raw.only = T, alpha = alpha)
+    res_f[i] <- mean(abs(res$cov - Sigma))
+    res_r[i] <- mean(abs(resrob$cov - Sigma))
+}
+
+t.test(x = res_f, y = res_r, paired = T)
+```
+
+Once again, we fail to reject the null hypothesis that the mean absolute error of the estimate covariance terms differs between `fastMCD` and `covMcd`.
+
+### Classification Comparison
+Using estimated covariance and mean parameters, we may obtain Mahalanobis distances for each observation and label observations with $d ^2 > \chi_{p, 1-\epsilon}^2$ as outliers, wherer $\epsilon$ is the error rate. We can then compare the classification for the two.
+
+```{r}
+n <- 3000
+alpha <- ((n + 3 + 1) / 2) / n
+mu <- rnorm(3, -10, 10)
+Sigma <- matrix(runif(9, 0, 3), 3)
+Sigma <- t(Sigma) %*% Sigma
+X <- mvrnorm(n, mu = mu, Sigma = Sigma)
+outlier_index <- sample(1:n, 100)
+X[outlier_index,] <- mvrnorm(100, mu = mu + rnorm(3), Sigma)
+res <- fastMCD(X)
+res_b <- covMcd(X, raw.only = T, alpha = alpha)
+```
+
+```{r}
+y <- rep(FALSE, n); y[outlier_index] <- TRUE
+d <- mahalanobis(X, center = res$center, cov = res$cov)
+y_pred <- d > qchisq(p = 1-100/3000, df = 3)
+table(y, y_pred)
+```
+
+```{r}
+d_b <- mahalanobis(X, center = res_b$center, cov = res_b$cov)
+y_pred_b <- d_b > qchisq(p = 1-100/3000, df = 3)
+table(y, y_pred_b)
+```
+
+We observe that contingency tables of `fastMCD` and `covMcd` are quite consistent.
+
+## Efficiency
+We can get a sense for the efficiency of `fastMCD` by comparing it with `covMcd`.
+
+```{r}
+X <- mvrnorm(1e3, mu = mu, Sigma = Sigma)
+tic()
+res <- fastMCD(X)
+toc()
+```
+
+```{r}
+alpha <- ((1e3 + 3 + 1) / 2) / 1e3
+tic()
+res <- covMcd(X, raw.only = T, alpha = alpha)
+toc()
+```
+
+Let's try another comparison with a large sample size
+```{r}
+X <- mvrnorm(1e5, mu = mu, Sigma = Sigma)
+tic()
+res <- fastMCD(X)
+toc()
+```
+
+```{r}
+alpha <- ((1e5 + 3 + 1) / 2) / 1e5
+tic()
+res <- covMcd(X, raw.only = T, alpha = alpha)
+toc()
+```
+
+We see that `fastMCD` is not quite as efficient as `covRob`, although it clearly improves on the polynomial time complexity of a naive MCD approach.
