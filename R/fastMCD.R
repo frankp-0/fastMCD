@@ -33,12 +33,8 @@ fastMCD <- function(X, h = 0){
                                         # reweight estimates
         d2 <- mahalanobis(X, center = res$T, cov = res$S)
         S_mcd <- median(d2) * res$S / qchisq(p = 0.5, df = p)
-        w <- mahalanobis(X, center = res$T, cov = S_mcd)
-        w <- w <= qchisq(p = 0.975, df = p)
-        T <- colSums(X * w) / sum(w)
-        S <- (t(X) %*% (X * w)) / (sum(w) - 1)
     }
-    return(list(center = T, cov = S))
+    return(list(center = res$T, cov = S_mcd))
 }
 
 #' Obtain unweighted estimates for data with <= 600 observations
