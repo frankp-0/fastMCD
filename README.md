@@ -20,31 +20,22 @@ devtools::install_github("frankp-0/fastMCD", build_vignettes = T)
 ```
 
 ## Usage
-The following examples demonstrate the usage of `fastMCD` for small (350 observations) and large (5000 observations) datasets which contain outliers. In both cases, the true means are 0 and the true covariance matrices are 3x3 identity matrices.
+The following examples demonstrate the usage of `fastMCD` for small (350 observations) and large (5000 observations) datasets.
 
 ```r
-library(fastMCD)
 smallX <- MASS::mvrnorm(n = 350, mu = rep(0, 3), Sigma = diag(rep(1, 3)))
 fastMCD(smallX)
-## $center
-## [1] -0.01491355  0.02881544  0.12785326
-## 
-## $cov
-##             [,1]       [,2]        [,3]
-## [1,]  0.47545610 -0.3179090 -0.07468779
-## [2,] -0.31790899  1.7742387  0.19795384
-## [3,] -0.07468779  0.1979538  1.49538074
 ```
 
 ```r
-bigX <- MASS::mvrnorm(n = 350, mu = rep(0, 3), Sigma = diag(rep(1, 3)))
+bigX <- MASS::mvrnorm(n = 5000, mu = rep(0, 3), Sigma = diag(rep(1, 3)))
 fastMCD(bigX)
-## $center
-## [1]  0.08968166 -0.07026145  0.18408677
-## 
-## $cov
-##             [,1]        [,2]        [,3]
-## [1,]  1.36256516  0.03485431 -0.03162824
-## [2,]  0.03485431  0.73979040 -0.28927492
-## [3,] -0.03162824 -0.28927492  1.17373954
+```
+
+Users may optionally specify their own argument for h = # of observations to subsample.
+
+
+```r
+X <- MASS::mvrnorm(n = 350, mu = rep(0, 3), Sigma = diag(rep(1, 3)))
+fastMCD(bigX, h = 500)
 ```
