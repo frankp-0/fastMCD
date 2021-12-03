@@ -17,3 +17,4 @@ A vector representing an h-length subset of X
 \description{
 Randomly draw a subset of observations
 }
+\keyword{internal}

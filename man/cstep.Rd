@@ -21,3 +21,4 @@ A list of set (H), scatter (S) and location (T)
 \description{
 Perform single iteration of C-step
 }
+\keyword{internal}

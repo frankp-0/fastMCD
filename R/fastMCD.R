@@ -38,6 +38,7 @@ fastMCD <- function(X, h = 0){
 }
 
 #' Obtain unweighted estimates for data with <= 600 observations
+#' @keywords internal
 #' @param X A 2D matrix to estimate location and scatter from
 #' @param h An integer specifying number of observations to use
 #' @return A list of estimated location (center) and scatter (cov)
@@ -61,6 +62,7 @@ smallMCD <- function(X, h){
 }
 
 #' Obtain unweighted estimates for data with > 600 observations
+#' @keywords internal
 #' @param X A 2D matrix to estimate location and scatter from
 #' @param h An integer specifying number of observations to use
 #' @param p An integer specifying the number of columns in X
@@ -121,6 +123,7 @@ bigMCD <- function(X, h, p, n){
 }
 
 #' Choose the 10 best estimates after iterating twice through initial sets
+#' @keywords internal
 #' @param X A 2D matrix
 #' @param H_all A 2D matrix where each row specifies a subset of observations
 #' @param h An integer specifying number of observations to use
@@ -147,6 +150,7 @@ pick10 <- function(X, H_all, h){
 }
 
 #' Iterate through C-step
+#' @keywords internal
 #' @param X A 2D matrix
 #' @param T A vector of the initial location estimate
 #' @param S A vector of the initial scatter estimate
@@ -176,6 +180,7 @@ step_it <- function(X, T, S, h, it = 0){
 }
 
 #' Perform single iteration of C-step
+#' @keywords internal
 #' @param X A 2D matrix
 #' @param T A vector of the initial location estimate
 #' @param S A vector of the initial scatter estimate
@@ -190,6 +195,7 @@ cstep <- function(X, T, S, h){
 }
 
 #' Randomly draw a subset of observations
+#' @keywords internal
 #' @param X A 2D matrix
 #' @param h An integer specifying the number of observations to use
 #' @return A vector representing an h-length subset of X

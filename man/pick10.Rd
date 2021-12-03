@@ -19,3 +19,4 @@ A list of best sets (H), scatter (S) and location (T)
 \description{
 Choose the 10 best estimates after iterating twice through initial sets
 }
+\keyword{internal}

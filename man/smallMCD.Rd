@@ -17,3 +17,4 @@ A list of estimated location (center) and scatter (cov)
 \description{
 Obtain unweighted estimates for data with <= 600 observations
 }
+\keyword{internal}
